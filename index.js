@@ -45,6 +45,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/products/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { OwnerEmail: email };
+      const result = await productCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/product/search", async (req, res) => {
       const filter = req.query;
       const query = {
