@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 
@@ -26,10 +26,43 @@ async function run() {
     await client.connect();
 
     const productCollection = client.db("techWaveDB").collection("products");
+    const reviewsCollection = client.db("techWaveDB").collection("reviews");
 
     // product related api
-    app.get("/product", async (req, res) => {
-      const result = await productCollection.find().toArray();
+    app.get("/products", async (req, res) => {
+      const query = {
+        status: "accepted",
+      };
+      const result = await productCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/product/search", async (req, res) => {
+      const filter = req.query;
+      const query = {
+        status: "accepted",
+        "tags.text": { $regex: filter.search, $options: "i" },
+      };
+      const result = await productCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    //  for review
+    app.get("/reviews", async (req, res) => {
+      const result = await reviewsCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/reviews", async (req, res) => {
+      const productReview = req.body;
+      const result = await reviewsCollection.insertOne(productReview);
       res.send(result);
     });
 
