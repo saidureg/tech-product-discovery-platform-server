@@ -27,6 +27,7 @@ async function run() {
 
     const productCollection = client.db("techWaveDB").collection("products");
     const reviewsCollection = client.db("techWaveDB").collection("reviews");
+    const reportCollection = client.db("techWaveDB").collection("reports");
 
     // product related api
     app.get("/products", async (req, res) => {
@@ -63,6 +64,13 @@ async function run() {
     app.post("/reviews", async (req, res) => {
       const productReview = req.body;
       const result = await reviewsCollection.insertOne(productReview);
+      res.send(result);
+    });
+
+    // for report
+    app.post("/reports", async (req, res) => {
+      const productReport = req.body;
+      const result = await reportCollection.insertOne(productReport);
       res.send(result);
     });
 
