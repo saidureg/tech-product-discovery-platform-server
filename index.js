@@ -92,6 +92,12 @@ async function run() {
       res.send(result);
     });
 
+    // for feature
+    app.get("/features", async (req, res) => {
+      const result = await featureCollection.find().toArray();
+      res.send(result);
+    });
+
     app.post("/products/features", async (req, res) => {
       const makeFeatured = req.body;
       const result = await featureCollection.insertOne(makeFeatured);
