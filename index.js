@@ -58,7 +58,25 @@ async function run() {
       });
     };
 
+    //  verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const isAdmin = user?.role === "admin";
+      if (!isAdmin) {
+        return res.status(403).send({ message: "Forbidden access" });
+      }
+      next();
+    };
+
     // user related api
+
+    app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
     app.post("/users", async (req, res) => {
       const user = req.body;
       // insert email to check if user already exists
@@ -70,6 +88,40 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
+
+    app.patch(
+      "/users/admin/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            role: "admin",
+          },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      }
+    );
+
+    app.patch(
+      "/users/moderator/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            role: "moderator",
+          },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      }
+    );
 
     // product related api
     app.get("/products", async (req, res) => {
