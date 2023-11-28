@@ -193,13 +193,13 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/products", async (req, res) => {
+    app.post("/products", verifyToken, async (req, res) => {
       const product = req.body;
       const result = await productCollection.insertOne(product);
       res.send(result);
     });
 
-    app.patch("/products/:id", async (req, res) => {
+    app.patch("/products/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const item = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -218,7 +218,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/products/:id", async (req, res) => {
+    app.delete("/products/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await productCollection.deleteOne(query);
@@ -238,11 +238,16 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/products/features", async (req, res) => {
-      const makeFeatured = req.body;
-      const result = await featureCollection.insertOne(makeFeatured);
-      res.send(result);
-    });
+    app.post(
+      "/products/features",
+      verifyToken,
+      verifyModerator,
+      async (req, res) => {
+        const makeFeatured = req.body;
+        const result = await featureCollection.insertOne(makeFeatured);
+        res.send(result);
+      }
+    );
 
     //  for review
     app.get("/reviews", async (req, res) => {
@@ -257,7 +262,7 @@ async function run() {
     });
 
     // for report
-    app.get("/reports", async (req, res) => {
+    app.get("/reports", verifyToken, verifyModerator, async (req, res) => {
       const result = await reportCollection.find().toArray();
       res.send(result);
     });
@@ -268,11 +273,29 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/reports/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await reportCollection.deleteOne(query);
-      res.send(result);
+    app.delete(
+      "/reports/:id",
+      verifyToken,
+      verifyModerator,
+      async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await reportCollection.deleteOne(query);
+        res.send(result);
+      }
+    );
+
+    // for admin stats
+    app.get("/admin-stats", verifyToken, verifyAdmin, async (req, res) => {
+      const users = await userCollection.estimatedDocumentCount();
+      const products = await productCollection.estimatedDocumentCount();
+      const reviews = await reviewsCollection.estimatedDocumentCount();
+
+      res.send([
+        { users: users },
+        { products: products },
+        { reviews: reviews },
+      ]);
     });
 
     // Send a ping to confirm a successful connection
