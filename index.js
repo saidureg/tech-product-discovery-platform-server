@@ -26,15 +26,13 @@ async function run() {
     await client.connect();
 
     const productCollection = client.db("techWaveDB").collection("products");
+    const featureCollection = client.db("techWaveDB").collection("features");
     const reviewsCollection = client.db("techWaveDB").collection("reviews");
     const reportCollection = client.db("techWaveDB").collection("reports");
 
     // product related api
     app.get("/products", async (req, res) => {
-      const query = {
-        status: "accepted",
-      };
-      const result = await productCollection.find(query).toArray();
+      const result = await productCollection.find().toArray();
       res.send(result);
     });
 
@@ -80,6 +78,7 @@ async function run() {
           description: item.description,
           externalLink: item.externalLink,
           time: item.time,
+          status: item.status,
         },
       };
       const result = await productCollection.updateOne(filter, updateDoc);
@@ -90,6 +89,12 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await productCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.post("/products/features", async (req, res) => {
+      const makeFeatured = req.body;
+      const result = await featureCollection.insertOne(makeFeatured);
       res.send(result);
     });
 
