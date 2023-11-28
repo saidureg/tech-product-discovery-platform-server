@@ -25,10 +25,24 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const userCollection = client.db("techWaveDB").collection("users");
     const productCollection = client.db("techWaveDB").collection("products");
     const featureCollection = client.db("techWaveDB").collection("features");
     const reviewsCollection = client.db("techWaveDB").collection("reviews");
     const reportCollection = client.db("techWaveDB").collection("reports");
+
+    // user related api
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      // insert email to check if user already exists
+      const query = { email: user.email };
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exists", insertedId: null });
+      }
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
 
     // product related api
     app.get("/products", async (req, res) => {
