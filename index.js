@@ -98,6 +98,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/features/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await featureCollection.findOne(query);
+      res.send(result);
+    });
+
     app.post("/products/features", async (req, res) => {
       const makeFeatured = req.body;
       const result = await featureCollection.insertOne(makeFeatured);
@@ -117,9 +124,21 @@ async function run() {
     });
 
     // for report
+    app.get("/reports", async (req, res) => {
+      const result = await reportCollection.find().toArray();
+      res.send(result);
+    });
+
     app.post("/reports", async (req, res) => {
       const productReport = req.body;
       const result = await reportCollection.insertOne(productReport);
+      res.send(result);
+    });
+
+    app.delete("/reports/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await reportCollection.deleteOne(query);
       res.send(result);
     });
 
