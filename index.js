@@ -29,6 +29,7 @@ async function run() {
     const userCollection = client.db("techWaveDB").collection("users");
     const productCollection = client.db("techWaveDB").collection("products");
     const upVoteCollection = client.db("techWaveDB").collection("upVote");
+    const downVoteCollection = client.db("techWaveDB").collection("downVote");
     const featureCollection = client.db("techWaveDB").collection("features");
     const reviewsCollection = client.db("techWaveDB").collection("reviews");
     const reportCollection = client.db("techWaveDB").collection("reports");
@@ -226,6 +227,13 @@ async function run() {
     });
 
     // for upvote
+    app.get("/product/upVote/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { product_id: id };
+      const result = await upVoteCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/product/upVote", verifyToken, async (req, res) => {
       const upVoteUserInfo = req.body;
       // insert vote to check if user already vote or not
@@ -240,8 +248,33 @@ async function run() {
           insertedId: null,
         });
       }
-      console.log(upVoteUserInfo);
       const result = await upVoteCollection.insertOne(upVoteUserInfo);
+      res.send(result);
+    });
+
+    // for downVote
+    app.get("/product/downVote/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { product_id: id };
+      const result = await downVoteCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.post("/product/downVote", verifyToken, async (req, res) => {
+      const downVoteUserInfo = req.body;
+      // insert vote to check if user already vote or not
+      const query = {
+        user_email: downVoteUserInfo.user_email,
+        product_id: downVoteUserInfo.product_id,
+      };
+      const existingVote = await downVoteCollection.findOne(query);
+      if (existingVote) {
+        return res.send({
+          message: "Your already voted this product",
+          insertedId: null,
+        });
+      }
+      const result = await downVoteCollection.insertOne(downVoteUserInfo);
       res.send(result);
     });
 
@@ -306,6 +339,12 @@ async function run() {
     );
 
     // for coupon code
+
+    app.get("/coupon", async (req, res) => {
+      const result = await couponCollection.find().toArray();
+      res.send(result);
+    });
+
     app.post("/coupon", verifyToken, verifyAdmin, async (req, res) => {
       const product = req.body;
       const result = await couponCollection.insertOne(product);
