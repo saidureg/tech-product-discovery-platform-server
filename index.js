@@ -28,6 +28,7 @@ async function run() {
 
     const userCollection = client.db("techWaveDB").collection("users");
     const productCollection = client.db("techWaveDB").collection("products");
+    const upVoteCollection = client.db("techWaveDB").collection("upVote");
     const featureCollection = client.db("techWaveDB").collection("features");
     const reviewsCollection = client.db("techWaveDB").collection("reviews");
     const reportCollection = client.db("techWaveDB").collection("reports");
@@ -221,6 +222,26 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await productCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // for upvote
+    app.post("/product/upVote", verifyToken, async (req, res) => {
+      const upVoteUserInfo = req.body;
+      // insert vote to check if user already vote or not
+      const query = {
+        user_email: upVoteUserInfo.user_email,
+        product_id: upVoteUserInfo.product_id,
+      };
+      const existingVote = await upVoteCollection.findOne(query);
+      if (existingVote) {
+        return res.send({
+          message: "Your already voted this product",
+          insertedId: null,
+        });
+      }
+      console.log(upVoteUserInfo);
+      const result = await upVoteCollection.insertOne(upVoteUserInfo);
       res.send(result);
     });
 
