@@ -31,6 +31,7 @@ async function run() {
     const featureCollection = client.db("techWaveDB").collection("features");
     const reviewsCollection = client.db("techWaveDB").collection("reviews");
     const reportCollection = client.db("techWaveDB").collection("reports");
+    const couponCollection = client.db("techWaveDB").collection("coupon");
 
     // jwt related api
     app.post("/jwt", async (req, res) => {
@@ -43,7 +44,6 @@ async function run() {
 
     // middleware to verify jwt token
     const verifyToken = (req, res, next) => {
-      // console.log("inside verify token", req.headers?.authorization);
       if (!req.headers.authorization) {
         return res.status(401).send({ message: "Unauthorized access" });
       }
@@ -52,7 +52,6 @@ async function run() {
         if (err) {
           return res.status(401).send({ message: "Unauthorized access" });
         }
-        // console.log("inside verify token", req.headers?.authorization);
         req.decoded = decoded;
         next();
       });
@@ -284,6 +283,13 @@ async function run() {
         res.send(result);
       }
     );
+
+    // for coupon code
+    app.post("/coupon", verifyToken, verifyAdmin, async (req, res) => {
+      const product = req.body;
+      const result = await couponCollection.insertOne(product);
+      res.send(result);
+    });
 
     // for admin stats
     app.get("/admin-stats", verifyToken, verifyAdmin, async (req, res) => {
