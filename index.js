@@ -359,9 +359,39 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/coupon/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await couponCollection.findOne(query);
+      res.send(result);
+    });
+
     app.post("/coupon", verifyToken, verifyAdmin, async (req, res) => {
       const product = req.body;
       const result = await couponCollection.insertOne(product);
+      res.send(result);
+    });
+
+    app.patch("/coupon/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const item = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          coupon_code: item.coupon_code,
+          discount_amount: item.discount_amount,
+          expiry_date: item.expiry_date,
+          description: item.description,
+        },
+      };
+      const result = await couponCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    app.delete("/coupon/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await couponCollection.deleteOne(query);
       res.send(result);
     });
 
