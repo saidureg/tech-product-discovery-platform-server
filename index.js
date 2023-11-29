@@ -227,6 +227,13 @@ async function run() {
     });
 
     // for upvote
+    app.get("/upVote/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { user_email: email };
+      const result = await upVoteCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/product/upVote/:id", async (req, res) => {
       const id = req.params.id;
       const query = { product_id: id };
@@ -253,6 +260,13 @@ async function run() {
     });
 
     // for downVote
+    app.get("/downVote/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { user_email: email };
+      const result = await downVoteCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/product/downVote/:id", async (req, res) => {
       const id = req.params.id;
       const query = { product_id: id };
