@@ -25,7 +25,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
 
     const userCollection = client.db("techWaveDB").collection("users");
     const productCollection = client.db("techWaveDB").collection("products");
@@ -262,21 +262,21 @@ async function run() {
     });
 
     // for downVote
-    app.get("/downVote/:email", async (req, res) => {
+    app.get("/downVotes/:email", async (req, res) => {
       const email = req.params.email;
       const query = { user_email: email };
       const result = await downVoteCollection.find(query).toArray();
       res.send(result);
     });
 
-    app.get("/product/downVote/:id", async (req, res) => {
+    app.get("/product/downVotes/:id", async (req, res) => {
       const id = req.params.id;
       const query = { product_id: id };
       const result = await downVoteCollection.find(query).toArray();
       res.send(result);
     });
 
-    app.post("/product/downVote", verifyToken, async (req, res) => {
+    app.post("/product/downVotes", verifyToken, async (req, res) => {
       const downVoteUserInfo = req.body;
       // insert vote to check if user already vote or not
       const query = {
